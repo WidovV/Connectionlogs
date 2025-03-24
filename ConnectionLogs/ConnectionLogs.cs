@@ -100,9 +100,10 @@ public class ConnectionLogs : BasePlugin, IPluginConfig<StandardConfig>
                 return;
             }
 
-            bool validPlayer = player != null;
             Server.NextFrame(() =>
             {
+                bool validPlayer = player != null;
+
                 foreach (User p in users)
                 {
                     if (!validPlayer)
