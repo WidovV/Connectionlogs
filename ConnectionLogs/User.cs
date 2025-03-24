@@ -1,10 +1,17 @@
-﻿namespace ConnectionLogs;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-internal class User
+namespace ConnectionLogs
 {
-    public int Id { get; set; }
-    public ulong SteamId { get; set; }
-    public string ClientName { get; set; }
-    public DateTime ConnectedAt { get; set; }
-    public DateTime LastSeen { get; set; }
+    internal class User
+    {
+        public int Id { get; set; }
+        public string SteamId { get; set; }
+        public string ClientName { get; set; }
+        public DateTime ConnectedAt { get; set; }
+        public DateTime LastSeen { get; set; }
+    }
 }

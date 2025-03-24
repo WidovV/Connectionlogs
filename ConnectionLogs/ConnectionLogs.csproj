@@ -6,6 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CounterStrikeSharp.API" Version="*" />
-    <PackageReference Include="Nexd.MySQL" Version="*" />
+    <PackageReference Include="Nexd.MySQL" Version="1.0.2" />
   </ItemGroup>
 </Project>
