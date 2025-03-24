@@ -90,26 +90,31 @@ public class ConnectionLogs : BasePlugin, IPluginConfig<StandardConfig>
             return;
         }
 
-        List<User> users = Queries.GetConnectedPlayers(_db);
-
-        if (users.Count == 0)
+        Task.Run(async () =>
         {
-            player.PrintToChat($"{Config.ChatPrefix} No connected players");
-            return;
-        }
+            IEnumerable<User> users = await Queries.GetConnectedPlayers(_db);
 
-        bool validPlayer = player != null;
-
-        foreach (User p in users)
-        {
-            if (!validPlayer)
+            if (!users.Any())
             {
-                Server.PrintToConsole($"{p.ClientName} ({p.SteamId}) First joined: {p.ConnectedAt} | Last seen: {p.LastSeen}");
-                continue;
+                player.PrintToChat($"{Config.ChatPrefix} No connected players");
+                return;
             }
 
-            player?.PrintToChat($"{Config.ChatPrefix} {p.ClientName} ({p.SteamId}) First joined: {p.ConnectedAt} | last seen {p.LastSeen}");
-        }
+            bool validPlayer = player != null;
+            Server.NextFrame(() =>
+            {
+                foreach (User p in users)
+                {
+                    if (!validPlayer)
+                    {
+                        Server.PrintToConsole($"{p.ClientName} ({p.SteamId}) First joined: {p.ConnectedAt} | Last seen: {p.LastSeen}");
+                        continue;
+                    }
+
+                    player?.PrintToChat($"{Config.ChatPrefix} {p.ClientName} ({p.SteamId}) First joined: {p.ConnectedAt} | last seen {p.LastSeen}");
+                }
+            });
+        });
     }
 
     public void OnConfigParsed(StandardConfig standardConfig)

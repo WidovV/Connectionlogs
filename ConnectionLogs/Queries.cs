@@ -7,12 +7,15 @@ namespace ConnectionLogs
     {
         public static void InsertNewClient(MySqlDb? db, CCSPlayerController player)
         {
-            MySqlQueryValue values = new MySqlQueryValue()
-                                    .Add("ClientName", player.PlayerName)
-                                    .Add("SteamId", player.SteamID.ToString())
-                                    .Add("IpAddress", player.IpAddress.Split(':')[0]);
+            Task.Run(async () =>
+            {
+                MySqlQueryValue values = new MySqlQueryValue()
+                        .Add("ClientName", player.PlayerName)
+                        .Add("SteamId", player.SteamID.ToString())
+                        .Add("IpAddress", player.IpAddress.Split(':')[0]);
 
-            db!.Table("Users").InsertIfNotExistAsync(values, $"`ClientName` = '{player.PlayerName}', `LastSeen` = CURRENT_TIMESTAMP()");
+               await db!.Table("Users").InsertIfNotExistAsync(values, $"`ClientName` = '{player.PlayerName}', `LastSeen` = CURRENT_TIMESTAMP()");
+            });
         }
 
         public static void CreateTable(MySqlDb? db)
@@ -71,18 +74,17 @@ namespace ConnectionLogs
             });
         }
 
-        public static List<User> GetConnectedPlayers(MySqlDb? db)
+        public static async Task<IEnumerable<User>> GetConnectedPlayers(MySqlDb? db)
         {
-            MySqlQueryResult result = db.Table("Users")
-                .ExecuteQueryAsync("SELECT Id, SteamId, ClientName, ConnectedAt, LastSeen FROM `Users` ORDER BY `LastSeen` DESC LIMIT 50").Result;
+            var result = await db.Table("Users")
+                .ExecuteQueryAsync("SELECT Id, SteamId, ClientName, ConnectedAt, LastSeen FROM `Users` ORDER BY `LastSeen` DESC LIMIT 50");
 
             if (result.Rows < 1)
             {
-                return new();
+                return [];
             }
 
-            List<User> users = new();
-
+            IEnumerable < User > users = [];
             foreach (KeyValuePair<int, MySqlFieldValue> pair in result)
             {
                 User user = new()
@@ -94,7 +96,7 @@ namespace ConnectionLogs
                     LastSeen = DateTime.Parse(pair.Value["LastSeen"].ToString())
                 };
 
-                users.Add(user);
+                users = users.Append(user);
             }
             return users;
         }
